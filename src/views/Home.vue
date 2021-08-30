@@ -15,7 +15,7 @@
         :y="item.y"  
         v-for="(item,index) of items" :key="item.id" 
         @activated="activate(item, index)"
-        @deactivated="deactivate(item, index)"
+     
         @dragging="drag" 
         @resizing="resize" 
         :parent="true"       
@@ -75,7 +75,8 @@ import VueDraggableResizable from 'vue-draggable-resizable'
         drag_w: null,
         drag_h: null,
         x: null,
-        y: null,    
+        y: null,   
+        id: null, 
         index: null, 
         image: '',
         width: null,
@@ -115,11 +116,12 @@ import VueDraggableResizable from 'vue-draggable-resizable'
         this.x = item.x;
         this.y = item.y;
         this.index = index;
+        console.log(item, index)
       },
-      deactivate(item, index) {
-        item.active = false;
-        this.index = index;
-      },
+      // deactivate(item, index) {
+      //   item.active = false;
+      //   this.index = index;
+      // },
       changeElement() {
         this.items[this.index]["drag_w"] = Number(this.drag_w);
         this.items[this.index]["drag_h"] = Number(this.drag_h);
@@ -136,7 +138,6 @@ import VueDraggableResizable from 'vue-draggable-resizable'
         this.drag_h = drag_h;
       },
       drag(x,y) { 
-        console.log(x,y) 
         this.x = x;
         this.y = y;
       },
