@@ -1,85 +1,146 @@
 <template>
   <div class="home">
-    <div class="wrapper">
-      <img v-if="image" :src="image" @mousemove="drag" />
-      <div v-if="image" :style="maskStyle">
-        <VueDragResize :isActive="true" :w="100" :h="100"        
-          v-on:resizing="resize" 
-          v-on:dragging="resize">
-          <button class="del_drag" @click="removeDrag">x</button>
-        </VueDragResize>
-      </div>    
-      <i v-else class="el-icon-picture avatar-uploader-icon"></i>     
-      <button v-if="!image" class="upload_btn">
+    <div class="wrapper" v-show="!image"> 
+      <i  class="el-icon-picture avatar-uploader-icon"></i>     
+      <button  class="upload_btn">
         <input class="default" type="file" @change="onFileChange">
         上傳圖片    
       </button>
-      <div v-else>
-        <button  class="del_btn" @click="removeImage">完成</button>
-        <span>寬：{{ width }} &nbsp;&nbsp; 高：{{ height }}</span>
-      </div>     
     </div>
-    <div v-if="image" class="d_table">
-      <table width="550">
-        <thead class="table-head">
-          <tr>
-            <th></th>
-            <th>X軸</th>
-            <th>Y軸</th>
-            <th>高度</th>
-            <th>寬度</th>
-          </tr>
-        </thead>
-        <tbody  >
-          <tr>
-            <td></td>
-            <td>{{ left }}</td>
-            <td>{{ top }}</td>
-            <td>{{ h }}</td>
-            <td>{{ w }}</td>
-          </tr>
-        </tbody>
-      </table>      
-    </div>
+    <div class="img" v-show="image" :style="'width:'+width+'px;height:'+height+'px;'">
+      <vue-draggable-resizable  
+        :w="item.drag_w" 
+        :h="item.drag_h" 
+        :x="item.x" 
+        :y="item.y"  
+        v-for="(item,index) of items" :key="item.id" 
+        @activated="activate(item, index)"
+        @deactivated="deactivate(item, index)"
+        @dragging="drag" 
+        @resizing="resize" 
+        :parent="true"       
+        style="z-index: 1;"> 
+        <button class="del_drag" @click="removeDrag(index)">x</button>
+      </vue-draggable-resizable>
+      <div>      
+        <img :src="image" @click="addElement"  />
+        <div style="display: flex; justify-content: space-between;padding-top: 10px;" v-show="image">
+          <span>寬：{{ width }} &nbsp;&nbsp; 高：{{ height }}</span>
+          <button  class="del_btn" @click="removeImage">完成</button>
+        </div>   
+      </div>
+      <div class="table" v-show="image" >
+        <table width="550">
+          <thead class="table-head">
+            <tr>
+              <th></th>
+              <th>X軸</th>
+              <th>Y軸</th>
+              <th>高度</th>
+              <th>寬度</th>
+            </tr>
+          </thead>
+          <tbody >
+            <tr v-for="(item,index) of items" :key="item.id" >
+              <td>
+                <input type="number" v-model="id" @click="changeElement">{{index+1}}
+              </td>
+              <td >
+                <input type="number" v-model="x" @click="changeElement">{{x}}
+              </td>
+              <td >
+                <input type="number" v-model="y" @click="changeElement">{{y}}
+              </td>
+              <td >
+                <input type="number" v-model="drag_h" @click="changeElement">{{drag_h}}
+              </td>
+              <td >
+                <input type="number" v-model="drag_w" @click="changeElement">{{drag_w}}
+              </td>           
+            </tr>
+          </tbody>
+        </table>      
+      </div>  
+           
+    </div>  
   </div>
 </template>
 <script>
- import VueDragResize from 'vue-drag-resize';
+import VueDraggableResizable from 'vue-draggable-resizable'
   export default {
     name: 'home',
-    components: {
-      VueDragResize
-    },
     data() {
       return {
+        active: null,
+        drag_w: null,
+        drag_h: null,
+        x: null,
+        y: null,    
+        index: null, 
         image: '',
-        width: 0,
-        height: 0,
-        w:0,
-        h:0,
-        top: 0,
-        left: 0,
-        maskstyle: {left:0 , top:0}
+        width: null,
+        height: null,
+        items: [
+          {
+            active: false,
+            id:this.index,
+            drag_w: 100,
+            drag_h: 100,
+            x: 10,
+            y: 10,
+          }
+        ]   
       };
     },
-    methods: {     
-      resize(newRect) {
-        this.w = newRect.width;
-        this.h = newRect.height;
-        this.top = newRect.top;
-        this.left = newRect.left;
+    methods: { 
+      addElement() {
+        this.active = false;
+        if(this.items.length<3){
+          this.index+=1;
+          this.items.push({
+            active: true,
+            drag_w: 100,
+            drag_h: 100,
+            x: 0,
+            y: 0,
+            id:this.index
+          })
+        }
       },
-      drag(e){       
-        var left = e.offsetX - this.w/2;
-        var top = e.offsetY - this.h/2;
-        if(left<0){left = 0}
-        else if(left>372 - this.w){left = 372 - this.w}
-        if(top<0){top=0}
-        else if(top>251 - this.h){top = 251 - this.h}
-        left = left + "px";
-        top = top + "px";
-        this.maskStyle = {left,top};
+      activate (item, index) {
+        item.active = true;
+        this.active = item.active;
+        this.drag_w = item.drag_w;
+        this.drag_h = item.drag_h;
+        this.x = item.x;
+        this.y = item.y;
+        this.index = index;
       },
+      deactivate(item, index) {
+        item.active = false;
+        this.index = index;
+      },
+      changeElement() {
+        this.items[this.index]["drag_w"] = Number(this.drag_w);
+        this.items[this.index]["drag_h"] = Number(this.drag_h);
+        this.items[this.index]["x"] = Number(this.x);
+        this.items[this.index]["y"] = Number(this.y);
+        const items = this.items;
+        this.items = [];
+        this.items = items;
+      },
+      resize(x,y, drag_w, drag_h) {
+        this.x = x;
+        this.y = y;
+        this.drag_w = drag_w;
+        this.drag_h = drag_h;
+      },
+      drag(x,y) { 
+        console.log(x,y) 
+        this.x = x;
+        this.y = y;
+      },
+
       onFileChange(e) {
         var files = e.target.files || e.dataTransfer.files;
         if (!files.length)
@@ -110,44 +171,40 @@
       removeDrag (index) {
         this.items.splice(index,1);
       }
-      
     }
   }
 </script>
 <style>
-  img {
-    width: 372px;
-    height: 251px;
+  .img{
+    display: flex;
+    flex-direction: row;
   }
   .home{
     margin-top: 90px;
     margin-left: 80px;
-    width: 372px;
-    height: 251px;
+    width: 400px;
+    height: 300px;
+    /* position: relative; */
   }
   .home .wrapper{
     margin-top: 90px;
     margin-left: 80px;
-    width: 372px;
-    height: 251px;
+    width: 400px;
+    height: 300px;
     border: 1px solid #d9d9d9;
     border-radius: 2px;
-    position: relative;
-  }
-  .img_bg {
-    position: absolute;
   }
   .avatar-uploader-icon {
     font-size: 52px;
     color: #8c939d;
-    width: 372px;
-    height: 251px;
+    width: 400px;
+    height: 300px;
     text-align: center;
-    line-height: 251px!important;
+    line-height: 300px!important;
   }
   .upload_btn {
     margin-top: 20px;
-    width: 372px;
+    width: 400px;
     height: 50px;
     border: 1px solid #d9d9d9;
     color: #727171;
@@ -157,7 +214,7 @@
   }
   input {
     opacity: 0;
-    width: 370px;
+    width: 398px;
     height: 48px;
     top: -1px;
     left: -1px;
@@ -165,7 +222,6 @@
     border: 1px solid #6b6b6b;
   }
   .del_btn {
-    margin-left: 270px;
     width: 100px;
     height: 40px;
     color: #ffffff;
@@ -174,9 +230,7 @@
     border: none;
   }
   table {
-    position: absolute;
-    top: 92px;
-    left: 620px;
+    margin-left: 60px;
     border: 1px solid #333333; border-collapse: collapse;
   }
   tr, td, th {
@@ -186,12 +240,26 @@
     text-align: center;
     color: #494949;
   }
+  .handle {
+    width: 10px;
+    height: 10px;
+    background: #eee;
+    border: 1px solid #333;
+  }
   .vdr.active:before {
-    outline: 1px solid #3a8ee6;
-  } 
-  .vdr-stick {
-    background:none;
-    border:none;
+    content: "";
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    outline: 1px solid #3a8ee6!important;
+  }
+  .vdr {
+    border: 1px solid #3a8ee6!important;
+  }
+  .handle {
+    background:none!important;
+    border:none!important;
   }
   .del_drag {
     color: #ffffff;
@@ -206,7 +274,7 @@
     font-size: 12px;
     visibility: hidden;
   }
-  .content-container:hover .del_drag {
+  .draggable:hover .del_drag {
     visibility: visible;
   }
   
