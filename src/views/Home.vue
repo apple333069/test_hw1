@@ -13,12 +13,12 @@
         :h="item.drag_h" 
         :x="item.x" 
         :y="item.y"  
+
         v-for="(item,index) of items" :key="item.id" 
-        @activated="activate(item, index)"
-     
+       
         @dragging="drag" 
-        @resizing="resize" 
-        :parent="true"       
+        @resizing="resize"
+        :parent="true"         
         style="z-index: 1;"> 
         <button class="del_drag" @click="removeDrag(index)">x</button>
       </vue-draggable-resizable>
@@ -66,7 +66,6 @@
   </div>
 </template>
 <script>
-import VueDraggableResizable from 'vue-draggable-resizable'
   export default {
     name: 'home',
     data() {
@@ -108,16 +107,16 @@ import VueDraggableResizable from 'vue-draggable-resizable'
           })
         }
       },
-      activate (item, index) {
-        item.active = true;
-        this.active = item.active;
-        this.drag_w = item.drag_w;
-        this.drag_h = item.drag_h;
-        this.x = item.x;
-        this.y = item.y;
-        this.index = index;
-        console.log(item, index)
-      },
+      // activate (item, index) {
+      //   item.active = true;
+      //   this.active = item.active;
+      //   this.drag_w = item.drag_w;
+      //   this.drag_h = item.drag_h;
+      //   this.x = item.x;
+      //   this.y = item.y;
+      //   this.index = index;
+      //   console.log(item, index)
+      // },
       // deactivate(item, index) {
       //   item.active = false;
       //   this.index = index;
@@ -141,7 +140,12 @@ import VueDraggableResizable from 'vue-draggable-resizable'
         this.x = x;
         this.y = y;
       },
-
+      // DragStartCallback(ev){
+      //   console.log(ev)
+      //   this.items[parseInt(ev.target.getAttribute('item'))].x = this.x;
+      //   this.items[parseInt(ev.target.getAttribute('item'))].y = this.y;
+      // },
+     
       onFileChange(e) {
         var files = e.target.files || e.dataTransfer.files;
         if (!files.length)
